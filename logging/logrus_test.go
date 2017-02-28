@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-type logFunc func(string, interface{})
+type logFunc func(...interface{})
 
 type jsonOutput struct {
 	Level string `json:"level"`
@@ -31,9 +31,11 @@ func initiateLogging(logLevel logrus.Level) (logging.Logging, *testWriter) {
 	w := &testWriter{}
 
 	log := logging.NewLogrusLogging(
-		logLevel,
-		w,
-		&logrus.JSONFormatter{},
+		logging.LogrusLoggingOptions{
+			LogLevel:  logLevel,
+			Output:    w,
+			Formatter: &logrus.JSONFormatter{},
+		},
 	)
 
 	return log, w

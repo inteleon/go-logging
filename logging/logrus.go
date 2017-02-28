@@ -6,19 +6,46 @@ import (
 	"reflect"
 )
 
+// DebugLevel is used to set the logger to the debug log level.
+const DebugLevel = log.DebugLevel
+
+// InfoLevel is used to set the logger to the info log level.
+const InfoLevel = log.InfoLevel
+
+// WarnLevel is used to set the logger to the warn log level.
+const WarnLevel = log.WarnLevel
+
+// ErrorLevel is used to set the logger to the error log level.
+const ErrorLevel = log.ErrorLevel
+
+// FatalLevel is used to set the logger to the fatal log level.
+const FatalLevel = log.FatalLevel
+
 // LogrusLogging is an easily testable logrus logging implementation.
 type LogrusLogging struct {
 	Log *log.Logger
 }
 
-// NewLogrusLogging initiates and returns a new logrus logging object.
-func NewLogrusLogging(logLevel log.Level, output io.Writer, formatter log.Formatter) Logging {
-	l := log.New()
-	l.Level = logLevel
-	l.Out = output
+type LogrusLoggingOptions struct {
+	LogLevel  log.Level
+	Output    io.Writer
+	Formatter log.Formatter
+}
 
-	if formatter != nil {
-		l.Formatter = formatter
+// NewLogrusLogging initiates and returns a new logrus logging object.
+func NewLogrusLogging(options LogrusLoggingOptions) Logging {
+	l := log.New()
+
+	if options.LogLevel != 0 {
+		l.Level = options.LogLevel
+	}
+
+	if options.Output != nil {
+		l.Out = options.Output
+	}
+
+	if options.Formatter != nil {
+		l.Formatter = options.Formatter
 	}
 
 	return &LogrusLogging{
@@ -27,36 +54,46 @@ func NewLogrusLogging(logLevel log.Level, output io.Writer, formatter log.Format
 }
 
 // Debug prints out a debug message.
-func (l *LogrusLogging) Debug(message string, params interface{}) {
-	l.setup(params).Debug(message)
+func (l *LogrusLogging) Debug(args ...interface{}) {
+	if len(args) > 0 && reflect.TypeOf(args[0]).Kind() == reflect.String {
+		l.setup(args[1:]).Debug(args[0].(string))
+	}
 }
 
 // Info prints out an info message.
-func (l *LogrusLogging) Info(message string, params interface{}) {
-	l.setup(params).Info(message)
+func (l *LogrusLogging) Info(args ...interface{}) {
+	if len(args) > 0 && reflect.TypeOf(args[0]).Kind() == reflect.String {
+		l.setup(args[1:]).Info(args[0].(string))
+	}
 }
 
 // Warn prints out a warning message.
-func (l *LogrusLogging) Warn(message string, params interface{}) {
-	l.setup(params).Warn(message)
+func (l *LogrusLogging) Warn(args ...interface{}) {
+	if len(args) > 0 && reflect.TypeOf(args[0]).Kind() == reflect.String {
+		l.setup(args[1:]).Warn(args[0].(string))
+	}
 }
 
 // Error prints out an error message.
-func (l *LogrusLogging) Error(message string, params interface{}) {
-	l.setup(params).Error(message)
+func (l *LogrusLogging) Error(args ...interface{}) {
+	if len(args) > 0 && reflect.TypeOf(args[0]).Kind() == reflect.String {
+		l.setup(args[1:]).Error(args[0].(string))
+	}
 }
 
 // Fatal prints out a fatal message and then exits with exit code 1.
-func (l *LogrusLogging) Fatal(message string, params interface{}) {
-	l.setup(params).Fatal(message)
+func (l *LogrusLogging) Fatal(args ...interface{}) {
+	if len(args) > 0 && reflect.TypeOf(args[0]).Kind() == reflect.String {
+		l.setup(args[1:]).Fatal(args[0].(string))
+	}
 }
 
 // setup is a helper function for sorting out the provided logging parameters.
-func (l *LogrusLogging) setup(params interface{}) *log.Entry {
-	if params != nil {
-		switch reflect.TypeOf(params).Kind() {
+func (l *LogrusLogging) setup(params []interface{}) *log.Entry {
+	if len(params) == 1 && params[0] != nil {
+		switch reflect.TypeOf(params[0]).Kind() {
 		case reflect.Map:
-			p := reflect.ValueOf(params)
+			p := reflect.ValueOf(params[0])
 
 			fields := map[string]interface{}{}
 
