@@ -21,11 +21,22 @@ const ErrorLevel = log.ErrorLevel
 // FatalLevel is used to set the logger to the fatal log level.
 const FatalLevel = log.FatalLevel
 
+// JSONFormatter is used to tell logrus to format the output as JSON.
+type JSONFormatter struct {
+	log.JSONFormatter
+}
+
+// TextFormatter is used to tell logrus to format the output as text.
+type TextFormatter struct {
+	log.TextFormatter
+}
+
 // LogrusLogging is an easily testable logrus logging implementation.
 type LogrusLogging struct {
 	Log *log.Logger
 }
 
+// LogrusLoggingOptions stores settings that are passed to the NewLogrusLogging function.
 type LogrusLoggingOptions struct {
 	LogLevel  log.Level
 	Output    io.Writer
