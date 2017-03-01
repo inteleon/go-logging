@@ -3,7 +3,6 @@ package logging_test
 import (
 	"encoding/json"
 	"github.com/inteleon/go-logging/logging"
-	logrus "github.com/sirupsen/logrus"
 	"testing"
 )
 
@@ -27,16 +26,13 @@ func (w *testWriter) Write(p []byte) (n int, err error) {
 	return
 }
 
-func initiateLogging(logLevel logrus.Level) (logging.Logging, *testWriter) {
+func initiateLogging(logLevel string) (logging.Logging, *testWriter) {
 	w := &testWriter{}
 
-	log := logging.NewLogrusLogging(
-		logging.LogrusLoggingOptions{
-			LogLevel:  logLevel,
-			Output:    w,
-			Formatter: &logrus.JSONFormatter{},
-		},
-	)
+	log := logging.NewLogrusLogging()
+	log.SetOutput(w)
+	log.SetLogLevel(logLevel)
+	log.SetFormatter(logging.JSONFormatter)
 
 	return log, w
 }
@@ -47,7 +43,7 @@ func parseLogEntry(entry []byte) (out jsonOutput, err error) {
 	return
 }
 
-func assertPrinting(t *testing.T, logLevel logrus.Level, f logFunc, writer *testWriter, extraVars bool) {
+func assertPrinting(t *testing.T, logLevel string, f logFunc, writer *testWriter, extraVars bool) {
 	expectedMessage := "hacker johnson"
 
 	if extraVars {
@@ -68,8 +64,8 @@ func assertPrinting(t *testing.T, logLevel logrus.Level, f logFunc, writer *test
 		t.Fatal("Unexpected JSON decode error", err)
 	}
 
-	if j.Level != logLevel.String() {
-		t.Fatal("expected", logLevel.String(), "got", j.Level)
+	if j.Level != logLevel {
+		t.Fatal("expected", logLevel, "got", j.Level)
 	}
 
 	if j.Msg != expectedMessage {
@@ -88,49 +84,49 @@ func assertPrinting(t *testing.T, logLevel logrus.Level, f logFunc, writer *test
 }
 
 func TestDebugPrintingWithoutVariables(t *testing.T) {
-	log, writer := initiateLogging(logrus.DebugLevel)
+	log, writer := initiateLogging(logging.DebugLogLevel)
 
-	assertPrinting(t, logrus.DebugLevel, log.Debug, writer, false)
+	assertPrinting(t, logging.DebugLogLevel, log.Debug, writer, false)
 }
 
 func TestInfoPrintingWithoutVariables(t *testing.T) {
-	log, writer := initiateLogging(logrus.InfoLevel)
+	log, writer := initiateLogging(logging.InfoLogLevel)
 
-	assertPrinting(t, logrus.InfoLevel, log.Info, writer, false)
+	assertPrinting(t, logging.InfoLogLevel, log.Info, writer, false)
 }
 
 func TestWarnPrintingWithoutVariables(t *testing.T) {
-	log, writer := initiateLogging(logrus.WarnLevel)
+	log, writer := initiateLogging(logging.WarningLogLevel)
 
-	assertPrinting(t, logrus.WarnLevel, log.Warn, writer, false)
+	assertPrinting(t, logging.WarningLogLevel, log.Warn, writer, false)
 }
 
 func TestErrorPrintingWithoutVariables(t *testing.T) {
-	log, writer := initiateLogging(logrus.ErrorLevel)
+	log, writer := initiateLogging(logging.ErrorLogLevel)
 
-	assertPrinting(t, logrus.ErrorLevel, log.Error, writer, false)
+	assertPrinting(t, logging.ErrorLogLevel, log.Error, writer, false)
 }
 
 func TestDebugPrintingWithVariables(t *testing.T) {
-	log, writer := initiateLogging(logrus.DebugLevel)
+	log, writer := initiateLogging(logging.DebugLogLevel)
 
-	assertPrinting(t, logrus.DebugLevel, log.Debug, writer, true)
+	assertPrinting(t, logging.DebugLogLevel, log.Debug, writer, true)
 }
 
 func TestInfoPrintingWithVariables(t *testing.T) {
-	log, writer := initiateLogging(logrus.InfoLevel)
+	log, writer := initiateLogging(logging.InfoLogLevel)
 
-	assertPrinting(t, logrus.InfoLevel, log.Info, writer, true)
+	assertPrinting(t, logging.InfoLogLevel, log.Info, writer, true)
 }
 
 func TestWarnPrintingWithVariables(t *testing.T) {
-	log, writer := initiateLogging(logrus.WarnLevel)
+	log, writer := initiateLogging(logging.WarningLogLevel)
 
-	assertPrinting(t, logrus.WarnLevel, log.Warn, writer, true)
+	assertPrinting(t, logging.WarningLogLevel, log.Warn, writer, true)
 }
 
 func TestErrorPrintingWithVariables(t *testing.T) {
-	log, writer := initiateLogging(logrus.ErrorLevel)
+	log, writer := initiateLogging(logging.ErrorLogLevel)
 
-	assertPrinting(t, logrus.ErrorLevel, log.Error, writer, true)
+	assertPrinting(t, logging.ErrorLogLevel, log.Error, writer, true)
 }

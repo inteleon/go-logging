@@ -6,61 +6,68 @@ import (
 	"reflect"
 )
 
-// DebugLevel is used to set the logger to the debug log level.
-const DebugLevel = log.DebugLevel
-
-// InfoLevel is used to set the logger to the info log level.
-const InfoLevel = log.InfoLevel
-
-// WarnLevel is used to set the logger to the warn log level.
-const WarnLevel = log.WarnLevel
-
-// ErrorLevel is used to set the logger to the error log level.
-const ErrorLevel = log.ErrorLevel
-
-// FatalLevel is used to set the logger to the fatal log level.
-const FatalLevel = log.FatalLevel
-
-// JSONFormatter is used to tell logrus to format the output as JSON.
-type JSONFormatter struct {
-	log.JSONFormatter
-}
-
-// TextFormatter is used to tell logrus to format the output as text.
-type TextFormatter struct {
-	log.TextFormatter
-}
-
 // LogrusLogging is an easily testable logrus logging implementation.
 type LogrusLogging struct {
 	Log *log.Logger
 }
 
-// LogrusLoggingOptions stores settings that are passed to the NewLogrusLogging function.
-type LogrusLoggingOptions struct {
-	LogLevel  log.Level
-	Output    io.Writer
-	Formatter log.Formatter
+// NewLogrusLogging initiates and returns a new logrus logging object.
+func NewLogrusLogging() Logging {
+	return &LogrusLogging{
+		Log: log.New(),
+	}
 }
 
-// NewLogrusLogging initiates and returns a new logrus logging object.
-func NewLogrusLogging(options LogrusLoggingOptions) Logging {
-	l := log.New()
+// SetOutput sets the output of the logger - where to write to.
+func (l *LogrusLogging) SetOutput(output io.Writer) {
+	l.Log.Out = output
+}
 
-	if options.LogLevel != 0 {
-		l.Level = options.LogLevel
+// SetLogLevel sets the logger log level.
+func (l *LogrusLogging) SetLogLevel(logLevel string) {
+	switch logLevel {
+	case DebugLogLevel:
+		l.Log.Level = log.DebugLevel
+
+		break
+	case InfoLogLevel:
+		l.Log.Level = log.InfoLevel
+
+		break
+	case WarningLogLevel:
+		l.Log.Level = log.WarnLevel
+
+		break
+	case ErrorLogLevel:
+		l.Log.Level = log.ErrorLevel
+
+		break
+	case FatalLogLevel:
+		l.Log.Level = log.FatalLevel
+
+		break
+	default:
+		l.Log.Level = log.InfoLevel
+
+		break
 	}
+}
 
-	if options.Output != nil {
-		l.Out = options.Output
-	}
+// SetFormatter sets the logger formatting.
+func (l *LogrusLogging) SetFormatter(formatter string) {
+	switch formatter {
+	case JSONFormatter:
+		l.Log.Formatter = &log.JSONFormatter{}
 
-	if options.Formatter != nil {
-		l.Formatter = options.Formatter
-	}
+		break
+	case TextFormatter:
+		l.Log.Formatter = &log.TextFormatter{}
 
-	return &LogrusLogging{
-		Log: l,
+		break
+	default:
+		l.Log.Formatter = &log.JSONFormatter{}
+
+		break
 	}
 }
 
