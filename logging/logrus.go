@@ -1,21 +1,64 @@
 package logging
 
 import (
-	log "github.com/sirupsen/logrus"
 	"io"
+	"log/syslog"
 	"reflect"
+
+	log "github.com/sirupsen/logrus"
+	lSyslog "github.com/sirupsen/logrus/hooks/syslog"
 )
 
 // LogrusLogging is an easily testable logrus logging implementation.
 type LogrusLogging struct {
-	Log *log.Logger
+	Log     *log.Logger
+	Options LogrusLoggingOptions
+}
+
+// LogrusLoggingOptions is used for configuring the Logrus logging driver.
+type LogrusLoggingOptions struct {
+	Syslog *LogrusLoggingSyslogOptions
+}
+
+// LogrusLoggingSyslogOptions is used for configuring Logrus driver's syslog hook.
+type LogrusLoggingSyslogOptions struct {
+	Protocol string
+	Address  string
+	Priority syslog.Priority
+	Tag      string
 }
 
 // NewLogrusLogging initiates and returns a new logrus logging object.
-func NewLogrusLogging() Logging {
-	return &LogrusLogging{
-		Log: log.New(),
+func NewLogrusLogging(options LogrusLoggingOptions) (Logging, error) {
+	l := &LogrusLogging{
+		Log:     log.New(),
+		Options: options,
 	}
+
+	err := l.syslog()
+
+	return l, err
+}
+
+func (l *LogrusLogging) syslog() error {
+	if l.Options.Syslog == nil {
+		return nil
+	}
+
+	hook, err := lSyslog.NewSyslogHook(
+		l.Options.Syslog.Protocol,
+		l.Options.Syslog.Address,
+		l.Options.Syslog.Priority,
+		l.Options.Syslog.Tag,
+	)
+
+	if err != nil {
+		return err
+	}
+
+	l.Log.Hooks.Add(hook)
+
+	return nil
 }
 
 // SetOutput sets the output of the logger - where to write to.

@@ -3,6 +3,7 @@ package logging_test
 import (
 	"encoding/json"
 	"github.com/inteleon/go-logging/logging"
+	"net"
 	"testing"
 )
 
@@ -29,7 +30,12 @@ func (w *testWriter) Write(p []byte) (n int, err error) {
 func initiateLogging(logLevel string) (logging.Logging, *testWriter) {
 	w := &testWriter{}
 
-	log := logging.NewLogrusLogging()
+	log, err := logging.NewLogrusLogging(logging.LogrusLoggingOptions{})
+
+	if err != nil {
+		panic(err)
+	}
+
 	log.SetOutput(w)
 	log.SetLogLevel(logLevel)
 	log.SetFormatter(logging.JSONFormatter)
@@ -129,4 +135,36 @@ func TestErrorPrintingWithVariables(t *testing.T) {
 	log, writer := initiateLogging(logging.ErrorLogLevel)
 
 	assertPrinting(t, logging.ErrorLogLevel, log.Error, writer, true)
+}
+
+func TestSyslogNotRunningFailure(t *testing.T) {
+	_, err := logging.NewLogrusLogging(
+		logging.LogrusLoggingOptions{
+			Syslog: &logging.LogrusLoggingSyslogOptions{
+				Protocol: "tcp", // this test requires the tcp protocol
+				Address:  "localhost:31337",
+			},
+		},
+	)
+
+	if err == nil {
+		t.Fatal("expected", "error", "got", "nil")
+	}
+}
+
+func TestSyslogRunningSuccess(t *testing.T) {
+	go net.Listen("tcp", "localhost:31337")
+
+	_, err := logging.NewLogrusLogging(
+		logging.LogrusLoggingOptions{
+			Syslog: &logging.LogrusLoggingSyslogOptions{
+				Protocol: "tcp", // this test requires the tcp protocol
+				Address:  "localhost:31337",
+			},
+		},
+	)
+
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
 }

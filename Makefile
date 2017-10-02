@@ -6,6 +6,11 @@ test: deps
 	@cd helper && go fmt
 	@go test ./...
 
-deps:
+clean:
+	@glide cc
+	@rm -rf .glide/
+	@rm -rf vendor/
+
+deps: clean
 	@echo "Fetching dependencies..."
-	@go get -u github.com/sirupsen/logrus
+	@glide install

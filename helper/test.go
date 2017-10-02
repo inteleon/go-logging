@@ -31,7 +31,12 @@ func NewTestLogging() (logging.Logging, *TestLogWriter) {
 		Buffer: [][]byte{},
 	}
 
-	l := logging.NewLogrusLogging()
+	l, err := logging.NewLogrusLogging(logging.LogrusLoggingOptions{})
+
+	if err != nil {
+		panic(err) // For backwards compatability - so we don't need to return the err value and handle it that way.
+	}
+
 	l.SetOutput(w)
 	l.SetLogLevel(logging.DebugLogLevel)
 	l.SetFormatter(logging.JSONFormatter)
