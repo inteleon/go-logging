@@ -38,4 +38,11 @@ type Logging interface {
 	SetOutput(io.Writer)
 	SetLogLevel(string)
 	SetFormatter(string)
+
+	Logger(string) Logger
+}
+
+// Logger is a simple interface for loggers, compatible with elastic.v5#Logger
+type Logger interface {
+	Printf(string, ...interface{})
 }
