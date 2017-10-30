@@ -20,10 +20,12 @@ func (l *LogrusLogging) Logger(level string) Logger {
 	return logger
 }
 
+// Logger implementation for Logrus
 type LogrusLogger struct {
 	printf func(string, ...interface{})
 }
 
+// Logger method for Logrus, prints using the selected logger from LogrusLogging.Logger()
 func (l LogrusLogger) Printf(str string, args ...interface{}) {
 	l.printf(str, args...)
 }
