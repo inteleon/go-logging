@@ -1,34 +1,23 @@
-package logging
+package logging_test
 
 import (
 	"encoding/json"
 	"testing"
+
+	"github.com/inteleon/go-logging/logging"
 )
-
-type testWriter struct {
-	Value []byte
-}
-
-func (w *testWriter) Write(p []byte) (n int, err error) {
-	w.Value = p
-	return
-}
-
-type jsonOutput struct {
-	Msg string `json:"msg"`
-}
 
 func testLogger(level, activeLevel string, hasOutput bool, t *testing.T) {
 	w := &testWriter{}
-	log, err := NewLogrusLogging(LogrusLoggingOptions{})
+	log, err := logging.NewLogrusLogging(logging.LogrusLoggingOptions{})
 
 	if err != nil {
-		panic(err)
+		t.Fatal(err)
 	}
 
 	log.SetOutput(w)
 	log.SetLogLevel(activeLevel)
-	log.SetFormatter(JSONFormatter)
+	log.SetFormatter(logging.JSONFormatter)
 
 	logger := log.Logger(level)
 
@@ -53,21 +42,21 @@ func testLogger(level, activeLevel string, hasOutput bool, t *testing.T) {
 }
 
 func TestDebugLogger(t *testing.T) {
-	testLogger(DebugLogLevel, DebugLogLevel, true, t)
-	testLogger(DebugLogLevel, InfoLogLevel, false, t)
+	testLogger(logging.DebugLogLevel, logging.DebugLogLevel, true, t)
+	testLogger(logging.DebugLogLevel, logging.InfoLogLevel, false, t)
 }
 
 func TestInfoLogger(t *testing.T) {
-	testLogger(InfoLogLevel, InfoLogLevel, true, t)
-	testLogger(InfoLogLevel, WarningLogLevel, false, t)
+	testLogger(logging.InfoLogLevel, logging.InfoLogLevel, true, t)
+	testLogger(logging.InfoLogLevel, logging.WarningLogLevel, false, t)
 }
 
 func TestWarningLogger(t *testing.T) {
-	testLogger(WarningLogLevel, WarningLogLevel, true, t)
-	testLogger(WarningLogLevel, ErrorLogLevel, false, t)
+	testLogger(logging.WarningLogLevel, logging.WarningLogLevel, true, t)
+	testLogger(logging.WarningLogLevel, logging.WarningLogLevel, false, t)
 }
 
 func TestErrorLogger(t *testing.T) {
-	testLogger(ErrorLogLevel, ErrorLogLevel, true, t)
-	testLogger(ErrorLogLevel, FatalLogLevel, false, t)
+	testLogger(logging.ErrorLogLevel, logging.ErrorLogLevel, true, t)
+	testLogger(logging.ErrorLogLevel, logging.FatalLogLevel, false, t)
 }
