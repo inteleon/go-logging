@@ -1,6 +1,0 @@
-package: github.com/inteleon/go-logging
-import:
-- package: github.com/sirupsen/logrus
-  version: ^1.0.3
-  subpackages:
-  - hooks/syslog

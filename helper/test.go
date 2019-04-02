@@ -3,6 +3,7 @@ package helper
 import (
 	"encoding/json"
 	"github.com/inteleon/go-logging/logging"
+	"sync"
 	"testing"
 )
 
@@ -16,12 +17,14 @@ type TestLoggingJSONOutput struct {
 // TestLogWriter is a test log writer that only collects what is written to it, doesn't output anything.
 type TestLogWriter struct {
 	Buffer [][]byte
+	lock   sync.Mutex
 }
 
-// Write appends what is written to the in-memory buffer.
+// Write appends what is written to the in-memory buffer. Due to suspected problems with concurrency, a lock has been introduced.
 func (s *TestLogWriter) Write(p []byte) (count int, err error) {
+	s.lock.Lock()
 	s.Buffer = append(s.Buffer, p)
-
+	s.lock.Unlock()
 	return
 }
 
@@ -34,7 +37,7 @@ func NewTestLogging() (logging.Logging, *TestLogWriter) {
 	l, err := logging.NewLogrusLogging(logging.LogrusLoggingOptions{})
 
 	if err != nil {
-		panic(err) // For backwards compatability - so we don't need to return the err value and handle it that way.
+		panic(err) // For backwards compatibility - so we don't need to return the err value and handle it that way.
 	}
 
 	l.SetOutput(w)
