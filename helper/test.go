@@ -23,7 +23,13 @@ type TestLogWriter struct {
 // Write appends what is written to the in-memory buffer. Due to suspected problems with concurrency, a lock has been introduced.
 func (s *TestLogWriter) Write(p []byte) (count int, err error) {
 	s.lock.Lock()
-	s.Buffer = append(s.Buffer, p)
+
+	// Copy the message into a fresh byte slice, otherwise we'll get problems with overwrites etc.
+	dst := make([]byte, len(p))
+	copy(dst, p)
+
+	// Append the copied buffer
+	s.Buffer = append(s.Buffer, dst)
 	s.lock.Unlock()
 	return
 }
