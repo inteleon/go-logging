@@ -53,7 +53,7 @@ func TestInfoLogger(t *testing.T) {
 
 func TestWarningLogger(t *testing.T) {
 	testLogger(logging.WarningLogLevel, logging.WarningLogLevel, true, t)
-	testLogger(logging.WarningLogLevel, logging.WarningLogLevel, false, t)
+	testLogger(logging.InfoLogLevel, logging.WarningLogLevel, false, t)
 }
 
 func TestErrorLogger(t *testing.T) {

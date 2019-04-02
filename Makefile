@@ -7,10 +7,8 @@ test: deps
 	@go test ./...
 
 clean:
-	@glide cc
-	@rm -rf .glide/
 	@rm -rf vendor/
 
 deps: clean
 	@echo "Fetching dependencies..."
-	@glide install
+	@go mod tidy
